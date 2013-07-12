@@ -656,7 +656,7 @@ _ndn_cmd_get(PyObject *UNUSED(self), PyObject *args)
 	JUMP_IF_NULL_MEM(comps, exit);
 
 	Py_BEGIN_ALLOW_THREADS
-	r = ccn_get(handle, name, interest, timeout, data, pco, comps, 0);
+	r = ccn_get(handle, name, interest, timeout, data, pco, comps, CCN_GET_NOKEYWAIT);
 	Py_END_ALLOW_THREADS
 
 	debug("ccn_get result=%d\n", r);
