@@ -77,12 +77,11 @@ class Face (object):
 		finally:
 			self._release_lock("expressInterest")
 
-        def expressInterestSimple (self, name, onData, onTimeout, template = None):
+        def expressInterestSimple (self, name, onData, onTimeout = None, template = None):
                 class TrivialExpressClosure (Closure.Closure):
-                        __slots__ = ["_baseName", "_onData", "_onTimeout"];
+                        __slots__ = ["_onData", "_onTimeout"];
 
                         def __init__ (self, baseName, onData, onTimeout):
-                                self._baseName = baseName
                                 self._onData = onData
                                 self._onTimeout = onTimeout
 
@@ -92,22 +91,24 @@ class Face (object):
                                     kind == Closure.UPCALL_CONTENT_UNVERIFIED or
                                     kind == Closure.UPCALL_CONTENT_KEYMISSING or
                                     kind == Closure.UPCALL_CONTENT_RAW):
-                                        return self._onData (self._baseName, upcallInfo.Interest, upcallInfo.ContentObject, kind)
+                                        return self._onData (upcallInfo.Interest, upcallInfo.ContentObject)
                                 elif (kind == Closure.UPCALL_INTEREST_TIMED_OUT):
-                                        return self._onTimeout (self._baseName, upcallInfo.Interest)
+                                        if self._onTimeout:
+                                                return self._onTimeout (upcallInfo.Interest)
+                                        else:
+                                                return Closure.RESULT_OK
                                 return Closure.RESULT_OK
 
                 trivial_closure = TrivialExpressClosure (name, onData, onTimeout)
                 self.expressInterest (name, trivial_closure, template)
 
-        def expressInterestForLatest (self, name, onData, onTimeout, timeoutms = 1.0):
+        def expressInterestForLatest (self, name, onData, onTimeout = None, timeoutms = 1.0):
                 this = self
 
                 class VersionResolverClosure (Closure.Closure):
-                        __slots__ = ["_baseName", "_onData", "_onTimeout"];
+                        __slots__ = ["_onData", "_onTimeout"];
 
                         def __init__ (self, baseName, onData, onTimeout):
-                                self._baseName = baseName
                                 self._onData = onData
                                 self._onTimeout = onTimeout
                                 self._foundVersion = None
@@ -125,8 +126,8 @@ class Face (object):
                                         template.exclude.add_any ()
 
                                         name = upcallInfo.ContentObject.name
-                                        if len(self._baseName) == len(name):
-                                             return self._onData (self._baseName, upcallInfo.Interest, self._foundVersion, kind)
+                                        if len(upcallInfo.Interest.name) == len(name):
+                                             return self._onData (upcallInfo.Interest, self._foundVersion)
 
                                         comp = upcallInfo.ContentObject.name[len(self._baseName)]
                                         template.exclude.add_name (Name.Name ().append (comp))
@@ -136,9 +137,12 @@ class Face (object):
 
                                 elif (kind == Closure.UPCALL_INTEREST_TIMED_OUT):
                                         if self._foundVersion:
-                                                return self._onData (self._baseName, upcallInfo.Interest, self._foundVersion, Closure.UPCALL_CONTENT)
+                                                return self._onData (upcallInfo.Interest, self._foundVersion)
                                         else:
-                                                return self._onTimeout (self._baseName, upcallInfo.Interest)
+                                                if self._onTimeout:
+                                                        return self._onTimeout (upcallInfo.Interest)
+                                                else:
+                                                        return Closure.RESULT_OK
                                 return Closure.RESULT_OK
 
                 trivial_closure = VersionResolverClosure (name, onData, onTimeout)
@@ -157,7 +161,7 @@ class Face (object):
 
         def setInterestFilterSimple (self, name, onInterest, flags = None):
                 class TrivialFilterClosure (Closure.Closure):
-                        # __slots__ = ["_baseName", "_onInterest"];
+                        __slots__ = ["_baseName", "_onInterest"];
 
                         def __init__ (self, baseName, onInterest):
                                 self._baseName = baseName
@@ -179,9 +183,8 @@ class Face (object):
 			self._release_lock("setInterestFilter")
 
 	# Blocking!
-	def get(self, name, template = None, timeoutms = 3000):
-#		if not _ndn.is_upcall_executing(self.ccn_data):
-#			raise Exception, "Get called outside of upcall"
+	def get (self, name, template = None, timeoutms = 3000):
+                raise NotImplementedError ("Blocking get operation is deprecated. Use expressInterestSimple with appropriate callback instead")
 
 		self._acquire_lock("get")
 		try:
