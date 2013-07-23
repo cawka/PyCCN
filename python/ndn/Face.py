@@ -70,14 +70,14 @@ class Face (object):
 
 	# Application-focused methods
 	#
-	def expressInterest(self, name, closure, template = None):
-		self._acquire_lock("expressInterest")
-		try:
-			return _ndn.express_interest(self, name, closure, template)
-		finally:
-			self._release_lock("expressInterest")
+        def _expressInterest(self, name, closure, template = None):
+                self._acquire_lock("expressInterest")
+                try:
+                        return _ndn.express_interest(self, name, closure, template)
+                finally:
+                        self._release_lock("expressInterest")
 
-        def expressInterestSimple (self, name, onData, onTimeout = None, template = None):
+        def expressInterest (self, name, onData, onTimeout = None, template = None):
                 class TrivialExpressClosure (Closure.Closure):
                         __slots__ = ["_onData", "_onTimeout"];
 
@@ -91,16 +91,16 @@ class Face (object):
                                     kind == Closure.UPCALL_CONTENT_UNVERIFIED or
                                     kind == Closure.UPCALL_CONTENT_KEYMISSING or
                                     kind == Closure.UPCALL_CONTENT_RAW):
-                                        return self._onData (upcallInfo.Interest, upcallInfo.ContentObject)
+                                        self._onData (upcallInfo.Interest, upcallInfo.ContentObject)
                                 elif (kind == Closure.UPCALL_INTEREST_TIMED_OUT):
                                         if self._onTimeout:
-                                                return self._onTimeout (upcallInfo.Interest)
-                                        else:
-                                                return Closure.RESULT_OK
+                                                self._onTimeout (upcallInfo.Interest)
+
+                                # Always return RESULT_OK
                                 return Closure.RESULT_OK
 
                 trivial_closure = TrivialExpressClosure (name, onData, onTimeout)
-                self.expressInterest (name, trivial_closure, template)
+                self._expressInterest (name, trivial_closure, template)
 
         def expressInterestForLatest (self, name, onData, onTimeout = None, timeoutms = 1.0):
                 this = self
@@ -137,19 +137,17 @@ class Face (object):
 
                                 elif (kind == Closure.UPCALL_INTEREST_TIMED_OUT):
                                         if self._foundVersion:
-                                                return self._onData (upcallInfo.Interest, self._foundVersion)
+                                                self._onData (upcallInfo.Interest, self._foundVersion)
                                         else:
                                                 if self._onTimeout:
-                                                        return self._onTimeout (upcallInfo.Interest)
-                                                else:
-                                                        return Closure.RESULT_OK
+                                                        self._onTimeout (upcallInfo.Interest)
                                 return Closure.RESULT_OK
 
                 trivial_closure = VersionResolverClosure (name, onData, onTimeout)
                 template = Interest.Interest (interestLifetime = timeoutms, childSelector = Interest.CHILD_SELECTOR_LEFT)
                 self.expressInterest (name, trivial_closure, template)
 
-	def setInterestFilter(self, name, closure, flags = None):
+	def _setInterestFilter(self, name, closure, flags = None):
 		self._acquire_lock("setInterestFilter")
 		try:
 			if flags is None:
@@ -159,7 +157,7 @@ class Face (object):
 		finally:
 			self._release_lock("setInterestFilter")
 
-        def setInterestFilterSimple (self, name, onInterest, flags = None):
+        def setInterestFilter (self, name, onInterest, flags = None):
                 class TrivialFilterClosure (Closure.Closure):
                         __slots__ = ["_baseName", "_onInterest"];
 
@@ -169,11 +167,12 @@ class Face (object):
 
                         def upcall(self, kind, upcallInfo):
                                 if (kind == Closure.UPCALL_INTEREST):
-                                        return self._onInterest (self._baseName, upcallInfo.Interest)
+                                        self._onInterest (self._baseName, upcallInfo.Interest)
+
                                 return Closure.RESULT_OK
 
                 trivial_closure = TrivialFilterClosure (name, onInterest)
-                self.setInterestFilter (name, trivial_closure, flags)
+                self._setInterestFilter (name, trivial_closure, flags)
 
         def clearInterestFilter(self, name):
                 self._acquire_lock("setInterestFilter")
