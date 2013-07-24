@@ -356,9 +356,6 @@ ContentObject_obj_from_ccn(PyObject *py_content_object)
 	r = PyObject_SetAttrString(py_obj_ContentObject, "ccn_data", py_content_object);
 	JUMP_IF_NEG(r, error);
 
-	r = PyObject_SetAttrString(py_obj_ContentObject, "ccn_data_dirty", Py_False);
-	JUMP_IF_NEG(r, error);
-
 	debug("ContentObject_from_ccn_parsed complete\n");
 
 	return py_obj_ContentObject;

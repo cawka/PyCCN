@@ -135,11 +135,6 @@ static PyMethodDef g_module_methods[] = {
 		METH_VARARGS | METH_KEYWORDS, NULL},
 	{"SignedInfo_obj_from_ccn", _ndn_cmd_SignedInfo_obj_from_ccn, METH_O,
 		NULL},
-#if 0
-	{"_ndn_SigningParams_to_ccn", _ndn_SigningParams_to_ccn, METH_VARARGS,
-		""},
-	{"_ndn_SigningParams_from_ccn", _ndn_SigningParams_from_ccn, METH_O, NULL},
-#endif
 	{"ExclusionFilter_names_to_ccn", _ndn_cmd_ExclusionFilter_names_to_ccn,
 		METH_O, NULL},
 	{"ExclusionFilter_obj_from_ccn", _ndn_cmd_ExclusionFilter_obj_from_ccn,
@@ -226,7 +221,6 @@ _ndn_get_type(enum e_class_type type)
 		{Name, "ndn.Name", "Name"},
 		{Signature, "ndn.ContentObject", "Signature"},
 		{SignedInfo, "ndn.ContentObject", "SignedInfo"},
-		{SigningParams, "ndn.ContentObject", "SigningParams"},
 		{UpcallInfo, "ndn.Closure", "UpcallInfo"},
 		{CLASS_TYPE_COUNT, NULL, NULL}
 	};

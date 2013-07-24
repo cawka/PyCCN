@@ -1,3 +1,4 @@
+## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 #
 # Copyright (c) 2011, Regents of the University of California
 # BSD license, See the COPYING file for more information
@@ -5,28 +6,32 @@
 #             Jeff Burke <jburke@ucla.edu>
 #
 
-__all__ = ['Face', 'Closure', 'ContentObject', 'Interest', 'Key', 'Name']
+__all__ = ['Face', 'Name', 'Interest', 'Data', 'Key', 'ContentObject']
 
-VERSION = 0.3
-
-import sys as _sys
+VERSION = 0.4
 
 try:
-	from ndn.Face import *
-	from ndn.Closure import *
-	from ndn.ContentObject import *
-	from ndn.Interest import *
-	from ndn.Key import *
-	from ndn.Name import *
-	from ndn import NameCrypto
-        from ndn.LocalPrefixDiscovery import *
+    from Face import Face
+    from Name import Name
+    from Interest import Interest
+    from Data import Data, ContentObject
+    from Key import Key
+
+    from EventLoop import EventLoop
+    from KeyLocator import KeyLocator
+    from SignedInfo import SignedInfo
+    from Signature import Signature
+    
+    from ndn import NameCrypto
+    from ndn.LocalPrefixDiscovery import LocalPrefixDiscovery
 
 except ImportError:
-	del _sys.modules[__name__]
-	raise
+    import sys as _sys
+    del _sys.modules [__name__]
+    del _sys
+    raise
 
-def name_compatibility():
-	global _name_immutable
+def name_compatibility ():
+    global _name_immutable
 
-	_name_immutable = 1
-
+    _name_immutable = 1

@@ -21,7 +21,6 @@ enum e_class_type {
 	Name,
 	Signature,
 	SignedInfo,
-	SigningParams,
 	UpcallInfo,
 	CLASS_TYPE_COUNT
 };
@@ -59,7 +58,6 @@ PyObject *_ndn_get_type(enum e_class_type type);
 #  define g_type_Name             _ndn_get_type(Name)
 #  define g_type_Signature        _ndn_get_type(Signature)
 #  define g_type_SignedInfo       _ndn_get_type(SignedInfo)
-#  define g_type_SigningParams    _ndn_get_type(SigningParams)
 #  define g_type_UpcallInfo       _ndn_get_type(UpcallInfo)
 
 extern PyObject *g_PyExc_CCNError;
