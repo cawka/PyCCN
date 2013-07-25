@@ -75,6 +75,10 @@ class EventLoop(object):
                 self.eventLock.release ()
 
                 self.run_once()
+            except _ndn.CCNError:
+                if self.running:
+                    # Report only if this exception wasn't intentional due to disconnect()
+                    raise
             except select.error, e:
                 if e[0] == 4:
                     continue
@@ -85,4 +89,6 @@ class EventLoop(object):
     def stop(self):
         self.running = False
         for fd, handle in zip(self.fds.keys(), self.fds.values()):
-            handle.disconnect ()
+            # disconnect only when nothing is running, otherwise segfaul guaranteed
+            if not _ndn.is_run_executing (handle.ccn_data):
+                handle.disconnect ()

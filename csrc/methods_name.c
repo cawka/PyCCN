@@ -49,7 +49,7 @@ name_comps_from_ccn(PyObject *py_cname)
 		int size;
 		unsigned char *component;
 
-		debug("name_comps_from_ccn component %d of %d \n", n, comp_index->n - 2);
+		debug("name_comps_from_ccn component %zd of %zd \n", n, comp_index->n - 2);
 
 		component = &(name->buf[comp_index->buf[n]]) + 1; // What is the first byte? (250?)
 		//debug("\t%s\n", component);

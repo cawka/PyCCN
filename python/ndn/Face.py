@@ -11,6 +11,7 @@ import _ndn
 
 import Closure
 import Interest
+from Name import Name
 
 import threading
 
@@ -73,12 +74,16 @@ class Face (object):
             self._release_lock("expressInterest")
 
     def expressInterest (self, name, onData, onTimeout = None, template = None):
+        if not isinstance (name, Name):
+            name = Name (name)
         self._expressInterest (name, 
                                Closure.TrivialExpressClosure (onData, onTimeout), 
                                template)
 
     def expressInterestForLatest (self, name, onData, onTimeout = None, timeoutms = 1.0):
-        self.expressInterest (name, 
+        if not isinstance (name, Name):
+            name = Name (name)
+        self.expressInterest (name,
                               Closure.VersionResolverClosure (self, onData, onTimeout), 
                               Interest.Interest (interestLifetime = timeoutms, 
                                                  childSelector = Interest.CHILD_SELECTOR_LEFT))
@@ -94,11 +99,17 @@ class Face (object):
             self._release_lock("setInterestFilter")
 
     def setInterestFilter (self, name, onInterest, flags = None):
+        if not isinstance (name, Name):
+            name = Name (name)
+
         self._setInterestFilter (name, 
                                  Closure.TrivialFilterClosure (name, onInterest), 
                                  flags)
 
     def clearInterestFilter(self, name):
+        if not isinstance (name, Name):
+            name = Name (name)
+
         self._acquire_lock("setInterestFilter")
         try:
             return _ndn.clear_interest_filter(self.ccn_data, name.ccn_data)
@@ -109,6 +120,8 @@ class Face (object):
     def get (self, name, template = None, timeoutms = 3000):
         raise NotImplementedError ("Blocking get operation is deprecated. Use expressInterestSimple with appropriate callback instead")
 
+        if not isinstance (name, Name):
+            name = Name (name)
         self._acquire_lock("get")
         try:
             return _ndn.get(self, name, template, timeoutms)

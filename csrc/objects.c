@@ -25,7 +25,7 @@ static struct type_to_name {
 	const char *name;
 } g_types_to_names[] = {
 	{CLOSURE, "Closure_ccn_data"},
-	{CONTENT_OBJECT, "ContentObject_ccn_data"},
+	{CONTENT_OBJECT, "Data_ccn_data"},
 	{EXCLUSION_FILTER, "ExclusionFilter_ccn_data"},
 	{HANDLE, "CCN_ccn_data"},
 	{INTEREST, "Interest_ccn_data"},

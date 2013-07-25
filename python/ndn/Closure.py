@@ -52,13 +52,13 @@ class UpcallInfo(object):
         self.ccn = None  # CCN object (not used)
         self.Interest = None  # Interest object
         self.matchedComps = None  # int
-        self.ContentObject = None  # Content object
+        self.Data = None  # Content object
 
     def __str__(self):
         ret = "ccn = %s" % self.ccn
         ret += "\nInterest = %s" % self.Interest
         ret += "\nmatchedComps = %s" % self.matchedComps
-        ret += "\nContentObject: %s" % str(self.ContentObject)
+        ret += "\nData: %s" % str(self.Data)
         return ret
 
 class TrivialExpressClosure (Closure):
@@ -82,7 +82,7 @@ class TrivialExpressClosure (Closure):
             kind == UPCALL_CONTENT_UNVERIFIED or
             kind == UPCALL_CONTENT_KEYMISSING or
             kind == UPCALL_CONTENT_RAW):
-            self.onData (upcallInfo.Interest, upcallInfo.ContentObject)
+            self.onData (upcallInfo.Interest, upcallInfo.Data)
         elif (kind == UPCALL_INTEREST_TIMED_OUT):
             if self.onTimeout:
                 self.onTimeout (upcallInfo.Interest)
@@ -111,17 +111,17 @@ class VersionResolverClosure (Closure):
             kind == UPCALL_CONTENT_UNVERIFIED or
             kind == UPCALL_CONTENT_KEYMISSING or
             kind == UPCALL_CONTENT_RAW):
-            self._foundVersion = upcallInfo.ContentObject
+            self._foundVersion = upcallInfo.Data
 
             template = upcallInfo.Interest
             template.exclude = Interest.ExclusionFilter ()
             template.exclude.add_any ()
 
-            name = upcallInfo.ContentObject.name
+            name = upcallInfo.Data.name
             if len(upcallInfo.Interest.name) == len(name):
                  return self.onData (upcallInfo.Interest, self._foundVersion)
 
-            comp = upcallInfo.ContentObject.name[len(self._baseName)]
+            comp = upcallInfo.Data.name[len(self._baseName)]
             template.exclude.add_name (Name.Name ().append (comp))
 
             self.face.expressInterest (upcallInfo.Interest.name, self, template)

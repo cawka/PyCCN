@@ -15,7 +15,7 @@ from SignedInfo import SignedInfo
 from Signature import Signature
 
 class Data (object):
-    def __init__ (self, name, content = None, signed_info = None):
+    def __init__ (self, name = None, content = None, signed_info = None):
         if isinstance (name, Name):
             self.name = name
         else:
@@ -26,7 +26,6 @@ class Data (object):
 
         # generated
         self.signature = None
-        self.verified = False
 
     # this is the finalization step
     # must pass a key here, there is no "default key" because
@@ -34,14 +33,14 @@ class Data (object):
     # thus there is no access to the ccn library keystore.
     #
     def sign(self, key):
-        self.ccn_data = _ndn.encode_ContentObject (self, 
+        self.ccn_data = _ndn.encode_Data (self, 
                                                    self.name.ccn_data,
                                                    self.content, 
                                                    self.signedInfo.ccn_data, key)
         
     @staticmethod
     def fromWire (wire):
-        return _ndn.ContentObject_obj_from_ccn_buffer (wire)
+        return _ndn.Data_obj_from_ccn_buffer (wire)
 
     def toWire (self):
         """
@@ -118,12 +117,6 @@ class Data (object):
             args += ["<signed>"]
 
         return "ndn.Data(%s)" % ", ".join(args)
-
-class ContentObject (Data):
-    """
-    Backwards compatibility
-    """
-    pass
 
 class DataException (Exception):
     pass

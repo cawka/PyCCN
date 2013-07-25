@@ -21,7 +21,7 @@
 
 static PyObject *
 Content_from_ccn_parsed(struct ccn_charbuf *content_object,
-		struct ccn_parsed_ContentObject *parsed_content_object)
+		struct ccn_parsed_Data *parsed_content_object)
 {
 	const char *value;
 	size_t size;
@@ -47,7 +47,7 @@ static PyObject *
 Name_obj_from_ccn_parsed(PyObject *py_content_object)
 {
 	struct ccn_charbuf *content_object;
-	struct ccn_parsed_ContentObject *parsed_content_object;
+	struct ccn_parsed_Data *parsed_content_object;
 	PyObject *py_ccn_name;
 	PyObject *py_Name;
 	struct ccn_charbuf *name;
@@ -65,7 +65,7 @@ Name_obj_from_ccn_parsed(PyObject *py_content_object)
 	name_end = parsed_content_object->offset[CCN_PCO_E_Name];
 	s = name_end - name_begin;
 
-	debug("ContentObject_from_ccn_parsed Name len=%zd\n", s);
+	debug("Data_from_ccn_parsed Name len=%zd\n", s);
 	if (parsed_content_object->name_ncomps <= 0) {
 		PyErr_SetString(g_PyExc_CCNNameError, "No name stored (or name is"
 				" invalid) in parsed content object");
@@ -95,7 +95,7 @@ Name_obj_from_ccn_parsed(PyObject *py_content_object)
 }
 
 static int
-parse_ContentObject(PyObject *py_content_object)
+parse_Data(PyObject *py_content_object)
 {
 	struct content_object_data *context;
 	struct ccn_charbuf *content_object;
@@ -113,7 +113,7 @@ parse_ContentObject(PyObject *py_content_object)
 	 * no error happens between deallocation and following line, so I'm not
 	 * setting context->pco to NULL
 	 */
-	context->pco = calloc(1, sizeof(struct ccn_parsed_ContentObject));
+	context->pco = calloc(1, sizeof(struct ccn_parsed_Data));
 	JUMP_IF_NULL_MEM(context->pco, error);
 
 	context->comps = ccn_indexbuf_create();
@@ -121,11 +121,11 @@ parse_ContentObject(PyObject *py_content_object)
 
 	content_object = CCNObject_Get(CONTENT_OBJECT, py_content_object);
 
-	r = ccn_parse_ContentObject(content_object->buf, content_object->length,
+	r = ccn_parse_Data(content_object->buf, content_object->length,
 			context->pco, context->comps);
 	if (r < 0) {
-		PyErr_SetString(g_PyExc_CCNContentObjectError, "Unable to parse the"
-				" ContentObject");
+		PyErr_SetString(g_PyExc_CCNDataError, "Unable to parse the"
+				" Data");
 		goto error;
 	}
 
@@ -139,7 +139,7 @@ error:
 	return -1;
 }
 
-struct ccn_parsed_ContentObject *
+struct ccn_parsed_Data *
 _ndn_content_object_get_pco(PyObject *py_content_object)
 {
 	struct content_object_data *context;
@@ -153,7 +153,7 @@ _ndn_content_object_get_pco(PyObject *py_content_object)
 	if (context->pco)
 		return context->pco;
 
-	r = parse_ContentObject(py_content_object);
+	r = parse_Data(py_content_object);
 	JUMP_IF_NEG(r, error);
 
 	assert(context->pco);
@@ -165,7 +165,7 @@ error:
 
 void
 _ndn_content_object_set_pco(PyObject *py_content_object,
-		struct ccn_parsed_ContentObject *pco)
+		struct ccn_parsed_Data *pco)
 {
 	struct content_object_data *context;
 
@@ -194,7 +194,7 @@ _ndn_content_object_get_comps(PyObject *py_content_object)
 	if (context->comps)
 		return context->comps;
 
-	r = parse_ContentObject(py_content_object);
+	r = parse_Data(py_content_object);
 	JUMP_IF_NEG(r, error);
 
 	assert(context->comps);
@@ -221,12 +221,12 @@ _ndn_content_object_set_comps(PyObject *py_content_object,
 	context->comps = comps;
 }
 
-// ** Methods of ContentObject
+// ** Methods of Data
 //
 // Content Objects
 
 PyObject *
-ContentObject_obj_from_ccn_buffer (PyObject *py_buffer)
+Data_obj_from_ccn_buffer (PyObject *py_buffer)
 {
   int r;
   Py_buffer buffer;
@@ -252,7 +252,7 @@ ContentObject_obj_from_ccn_buffer (PyObject *py_buffer)
   r = ccn_charbuf_append (data, buffer.buf, buffer.len);
   JUMP_IF_NEG_MEM(r, error);
 
-  py_o = ContentObject_obj_from_ccn (py_data);
+  py_o = Data_obj_from_ccn (py_data);
   Py_CLEAR(py_data);
   JUMP_IF_NULL(py_o, error);
 
@@ -263,11 +263,11 @@ error:
 }
 
 PyObject *
-ContentObject_obj_from_ccn(PyObject *py_content_object)
+Data_obj_from_ccn(PyObject *py_content_object)
 {
 	struct ccn_charbuf *content_object;
-	struct ccn_parsed_ContentObject *parsed_content_object;
-	PyObject *py_obj_ContentObject, *py_o;
+	struct ccn_parsed_Data *parsed_content_object;
+	PyObject *py_obj_Data, *py_o;
 	int r;
 	struct ccn_charbuf *signature;
 	PyObject *py_signature;
@@ -282,29 +282,29 @@ ContentObject_obj_from_ccn(PyObject *py_content_object)
 	if (!parsed_content_object)
 		return NULL;
 
-	debug("ContentObject_from_ccn_parsed content_object->length=%zd\n",
+	debug("Data_from_ccn_parsed content_object->length=%zd\n",
 			content_object->length);
 
-	py_obj_ContentObject = PyObject_CallObject(g_type_ContentObject, NULL);
-	if (!py_obj_ContentObject)
+	py_obj_Data = PyObject_CallObject(g_type_Data, NULL);
+	if (!py_obj_Data)
 		return NULL;
 
 	/* Name */
 	py_o = Name_obj_from_ccn_parsed(py_content_object);
 	JUMP_IF_NULL(py_o, error);
-	r = PyObject_SetAttrString(py_obj_ContentObject, "name", py_o);
+	r = PyObject_SetAttrString(py_obj_Data, "name", py_o);
 	Py_DECREF(py_o);
 	JUMP_IF_NEG(r, error);
 
 	/* Content */
 	py_o = Content_from_ccn_parsed(content_object, parsed_content_object);
 	JUMP_IF_NULL(py_o, error);
-	r = PyObject_SetAttrString(py_obj_ContentObject, "content", py_o);
+	r = PyObject_SetAttrString(py_obj_Data, "content", py_o);
 	Py_DECREF(py_o);
 	JUMP_IF_NEG(r, error);
 
 	/* Signature */
-	debug("ContentObject_from_ccn_parsed Signature\n");
+	debug("Data_from_ccn_parsed Signature\n");
 	py_signature = CCNObject_New_charbuf(SIGNATURE, &signature);
 	JUMP_IF_NULL(py_signature, error);
 	r = ccn_charbuf_append(signature,
@@ -320,11 +320,11 @@ ContentObject_obj_from_ccn(PyObject *py_content_object)
 	py_o = Signature_obj_from_ccn(py_signature);
 	Py_DECREF(py_signature);
 	JUMP_IF_NULL(py_o, error);
-	r = PyObject_SetAttrString(py_obj_ContentObject, "signature", py_o);
+	r = PyObject_SetAttrString(py_obj_Data, "signature", py_o);
 	Py_DECREF(py_o);
 	JUMP_IF_NEG(r, error);
 
-	debug("ContentObject_from_ccn_parsed SignedInfo\n");
+	debug("Data_from_ccn_parsed SignedInfo\n");
 
 	py_signed_info = CCNObject_New_charbuf(SIGNED_INFO, &signed_info);
 	JUMP_IF_NULL(py_signed_info, error);
@@ -342,26 +342,26 @@ ContentObject_obj_from_ccn(PyObject *py_content_object)
 	py_o = SignedInfo_obj_from_ccn(py_signed_info);
 	Py_DECREF(py_signed_info);
 	JUMP_IF_NULL(py_o, error);
-	r = PyObject_SetAttrString(py_obj_ContentObject, "signedInfo", py_o);
+	r = PyObject_SetAttrString(py_obj_Data, "signedInfo", py_o);
 	Py_DECREF(py_o);
 	JUMP_IF_NEG(r, error);
 
-	debug("ContentObject_from_ccn_parsed DigestAlgorithm\n");
+	debug("Data_from_ccn_parsed DigestAlgorithm\n");
 	// TODO...  Note this seems to default to nothing in the library...?
-	r = PyObject_SetAttrString(py_obj_ContentObject, "digestAlgorithm", Py_None);
+	r = PyObject_SetAttrString(py_obj_Data, "digestAlgorithm", Py_None);
 	JUMP_IF_NEG(r, error);
 
 	/* Original data  */
-	debug("ContentObject_from_ccn_parsed ccn_data\n");
-	r = PyObject_SetAttrString(py_obj_ContentObject, "ccn_data", py_content_object);
+	debug("Data_from_ccn_parsed ccn_data\n");
+	r = PyObject_SetAttrString(py_obj_Data, "ccn_data", py_content_object);
 	JUMP_IF_NEG(r, error);
 
-	debug("ContentObject_from_ccn_parsed complete\n");
+	debug("Data_from_ccn_parsed complete\n");
 
-	return py_obj_ContentObject;
+	return py_obj_Data;
 
 error:
-	Py_XDECREF(py_obj_ContentObject);
+	Py_XDECREF(py_obj_Data);
 	return NULL;
 }
 
@@ -431,7 +431,7 @@ _ndn_cmd_content_to_bytes(PyObject *UNUSED(self), PyObject *arg)
 }
 
 PyObject *
-_ndn_cmd_encode_ContentObject(PyObject *UNUSED(self), PyObject *args)
+_ndn_cmd_encode_Data(PyObject *UNUSED(self), PyObject *args)
 {
 	PyObject *py_content_object, *py_name, *py_content, *py_signed_info,
 			*py_key;
@@ -447,8 +447,8 @@ _ndn_cmd_encode_ContentObject(PyObject *UNUSED(self), PyObject *args)
 			&py_content, &py_signed_info, &py_key))
 		return NULL;
 
-	if (strcmp(py_content_object->ob_type->tp_name, "ContentObject")) {
-		PyErr_SetString(PyExc_TypeError, "Must pass a ContentObject as arg 1");
+	if (strcmp(py_content_object->ob_type->tp_name, "Data")) {
+		PyErr_SetString(PyExc_TypeError, "Must pass a Data as arg 1");
 		return NULL;
 	}
 
@@ -481,14 +481,14 @@ _ndn_cmd_encode_ContentObject(PyObject *UNUSED(self), PyObject *args)
 		return NULL;
 	}
 
-	// DigestAlgorithm
-	py_o = PyObject_GetAttrString(py_content_object, "digestAlgorithm");
-	if (py_o != Py_None) {
-		PyErr_SetString(PyExc_NotImplementedError, "non-default digest"
-				" algorithm not yet supported");
-		goto error;
-	}
-	Py_CLEAR(py_o);
+	// // DigestAlgorithm
+	// py_o = PyObject_GetAttrString(py_content_object, "digestAlgorithm");
+	// if (py_o != Py_None) {
+	// 	PyErr_SetString(PyExc_NotImplementedError, "non-default digest"
+	// 			" algorithm not yet supported");
+	// 	goto error;
+	// }
+	// Py_CLEAR(py_o);
 
 	// Key
 	private_key = Key_to_ccn_private(py_key);
@@ -496,21 +496,21 @@ _ndn_cmd_encode_ContentObject(PyObject *UNUSED(self), PyObject *args)
 	// Note that we don't load this key into the keystore hashtable in the library
 	// because it makes this method require access to a ccn handle, and in fact,
 	// ccn_sign_content just uses what's in signedinfo (after an error check by
-	// chk_signing_params and then calls ccn_encode_ContentObject anyway
+	// chk_signing_params and then calls ccn_encode_Data anyway
 	//
 	// Encode the content object
 
-	// Build the ContentObject here.
+	// Build the Data here.
 	content_object = ccn_charbuf_create();
 	JUMP_IF_NULL_MEM(content_object, error);
 
 	r = ccn_encode_ContentObject(content_object, name, signed_info, content,
 			content_len, digest_alg, private_key);
 
-	debug("ccn_encode_ContentObject res=%d\n", r);
+	debug("ccn_encode_Data res=%d\n", r);
 	if (r < 0) {
 		ccn_charbuf_destroy(&content_object);
-		PyErr_SetString(g_PyExc_CCNError, "Unable to encode ContentObject");
+		PyErr_SetString(g_PyExc_CCNError, "Unable to encode Data");
 		goto error;
 	}
 
@@ -522,15 +522,15 @@ error:
 }
 
 PyObject *
-_ndn_cmd_ContentObject_obj_from_ccn(PyObject *UNUSED(self), PyObject *py_co)
+_ndn_cmd_Data_obj_from_ccn(PyObject *UNUSED(self), PyObject *py_co)
 {
-	return ContentObject_obj_from_ccn(py_co);
+	return Data_obj_from_ccn(py_co);
 }
 
 PyObject *
-_ndn_cmd_ContentObject_obj_from_ccn_buffer(PyObject *UNUSED(self), PyObject *py_buffer)
+_ndn_cmd_Data_obj_from_ccn_buffer(PyObject *UNUSED(self), PyObject *py_buffer)
 {
-	return ContentObject_obj_from_ccn_buffer(py_buffer);
+	return Data_obj_from_ccn_buffer(py_buffer);
 }
 
 PyObject *
@@ -538,14 +538,14 @@ _ndn_cmd_digest_contentobject(PyObject *UNUSED(self), PyObject *args)
 {
 	PyObject *py_content_object;
 	struct ccn_charbuf *content_object;
-	struct ccn_parsed_ContentObject *parsed_content_object;
+	struct ccn_parsed_Data *parsed_content_object;
 	PyObject *py_digest;
 
 	if (!PyArg_ParseTuple(args, "O", &py_content_object))
 		return NULL;
 
 	if (!CCNObject_IsValid(CONTENT_OBJECT, py_content_object)) {
-		PyErr_SetString(PyExc_TypeError, "Expected CCN ContentObject");
+		PyErr_SetString(PyExc_TypeError, "Expected CCN Data");
 		return NULL;
 	}
 
@@ -559,7 +559,7 @@ _ndn_cmd_digest_contentobject(PyObject *UNUSED(self), PyObject *args)
 	 * capsule's context, since they're very closely related)
 	 */
 	if (content_object->length != parsed_content_object->offset[CCN_PCO_E]) {
-		PyErr_SetString(PyExc_ValueError, "ContentObject size doesn't match"
+		PyErr_SetString(PyExc_ValueError, "Data size doesn't match"
 				" the size reported by pco");
 		return NULL;
 	}
@@ -577,7 +577,7 @@ _ndn_cmd_content_matches_interest(PyObject *UNUSED(self), PyObject *args)
 {
 	PyObject *py_content_object, *py_interest;
 	struct ccn_charbuf *content_object, *interest;
-	struct ccn_parsed_ContentObject *pco;
+	struct ccn_parsed_Data *pco;
 	struct ccn_parsed_interest *pi;
 	int r;
 	PyObject *res;
@@ -586,7 +586,7 @@ _ndn_cmd_content_matches_interest(PyObject *UNUSED(self), PyObject *args)
 		return NULL;
 
 	if (!CCNObject_IsValid(CONTENT_OBJECT, py_content_object)) {
-		PyErr_SetString(PyExc_TypeError, "Expected CCN ContentObject");
+		PyErr_SetString(PyExc_TypeError, "Expected CCN Data");
 		return NULL;
 	}
 
@@ -622,7 +622,7 @@ _ndn_cmd_verify_content(PyObject *UNUSED(self), PyObject *args)
 	PyObject *res;
 	struct ccn *handle;
 	struct ccn_charbuf *content_object;
-	struct ccn_parsed_ContentObject *pco;
+	struct ccn_parsed_Data *pco;
 	int r;
 
 	if (!PyArg_ParseTuple(args, "OO", &py_handle, &py_content_object))
@@ -635,7 +635,7 @@ _ndn_cmd_verify_content(PyObject *UNUSED(self), PyObject *args)
 
 	if (!CCNObject_IsValid(CONTENT_OBJECT, py_content_object)) {
 		PyErr_SetString(PyExc_TypeError, "argument 2 must be CCN"
-				" ContentObject");
+				" Data");
 		return NULL;
 	}
 
@@ -661,7 +661,7 @@ _ndn_cmd_verify_signature(PyObject *UNUSED(self), PyObject *args)
 	PyObject *py_content_object, *py_pub_key;
 	PyObject *res;
 	struct ccn_charbuf *content_object;
-	struct ccn_parsed_ContentObject *pco;
+	struct ccn_parsed_Data *pco;
 	struct ccn_pkey *pub_key;
 	int r;
 
@@ -670,7 +670,7 @@ _ndn_cmd_verify_signature(PyObject *UNUSED(self), PyObject *args)
 
 	if (!CCNObject_IsValid(CONTENT_OBJECT, py_content_object)) {
 		PyErr_SetString(PyExc_TypeError, "argument 1 must be CCN"
-				" ContentObject");
+				" Data");
 		return NULL;
 	}
 

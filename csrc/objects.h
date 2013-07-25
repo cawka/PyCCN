@@ -35,7 +35,7 @@ enum _ndn_capsules {
 };
 
 struct content_object_data {
-	struct ccn_parsed_ContentObject *pco;
+	struct ccn_parsed_Data *pco;
 	struct ccn_indexbuf *comps;
 };
 

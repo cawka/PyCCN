@@ -6,7 +6,7 @@
 #             Jeff Burke <jburke@ucla.edu>
 #
 
-__all__ = ['Face', 'Name', 'Interest', 'Data', 'Key', 'ContentObject']
+__all__ = ['Face', 'Name', 'Interest', 'Data', 'Key']
 
 VERSION = 0.4
 
@@ -14,12 +14,12 @@ try:
     from Face import Face
     from Name import Name
     from Interest import Interest
-    from Data import Data, ContentObject
+    from Data import Data
     from Key import Key
 
     from EventLoop import EventLoop
     from KeyLocator import KeyLocator
-    from SignedInfo import SignedInfo
+    from SignedInfo import SignedInfo, CONTENT_DATA, CONTENT_ENCR, CONTENT_GONE, CONTENT_KEY, CONTENT_LINK, CONTENT_NACK
     from Signature import Signature
     
     from ndn import NameCrypto

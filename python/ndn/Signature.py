@@ -29,6 +29,7 @@ class Signature(object):
 
     def __str__(self):
         res = []
-        res.append("witness = %s" % self.witness)
+        if self.witness:
+            res.append("witness = %s" % self.witness)
         res.append("signatureBits = %r" % self.signatureBits)
         return "\n".join(res)

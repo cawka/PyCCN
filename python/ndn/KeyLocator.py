@@ -13,7 +13,7 @@ from Name import Name
 class KeyLocator (object):
     __slots__ = ["ccn_data", "keyName"]
     
-    def __init__ (self, keyName):
+    def __init__ (self, keyName = None):
         if isinstance (keyName, Name):
             self.keyName = keyName
         else:

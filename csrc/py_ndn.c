@@ -54,7 +54,7 @@ PyObject *g_PyExc_CCNSignedInfoError;
 PyObject *g_PyExc_CCNInterestError;
 PyObject *g_PyExc_CCNExclusionFilterError;
 PyObject *g_PyExc_CCNKeyError;
-PyObject *g_PyExc_CCNContentObjectError;
+PyObject *g_PyExc_CCNDataError;
 
 static PyMethodDef g_module_methods[] = {
 	{"create", _ndn_cmd_create, METH_NOARGS, NULL},
@@ -85,7 +85,7 @@ static PyMethodDef g_module_methods[] = {
 	{"DER_write_key", (PyCFunction) _ndn_cmd_DER_write_key,
 		METH_VARARGS | METH_KEYWORDS, NULL},
 
-	// ** Methods of ContentObject
+	// ** Methods of Data
 	//
 	{"content_to_bytearray", _ndn_cmd_content_to_bytearray, METH_O, NULL},
 	{"content_to_bytes", _ndn_cmd_content_to_bytes, METH_O, NULL},
@@ -115,11 +115,11 @@ static PyMethodDef g_module_methods[] = {
 	{"name_comps_from_ccn", _ndn_cmd_name_comps_from_ccn, METH_O, NULL},
 	{"Interest_obj_to_ccn", _ndn_cmd_Interest_obj_to_ccn, METH_O, NULL},
 	{"Interest_obj_from_ccn", _ndn_cmd_Interest_obj_from_ccn, METH_O, NULL},
-	{"encode_ContentObject", _ndn_cmd_encode_ContentObject, METH_VARARGS,
+	{"encode_Data", _ndn_cmd_encode_Data, METH_VARARGS,
 		NULL},
-	{"ContentObject_obj_from_ccn", _ndn_cmd_ContentObject_obj_from_ccn,
+	{"Data_obj_from_ccn", _ndn_cmd_Data_obj_from_ccn,
 		METH_O, NULL},
-        {"ContentObject_obj_from_ccn_buffer", _ndn_cmd_ContentObject_obj_from_ccn_buffer, METH_O, NULL},
+        {"Data_obj_from_ccn_buffer", _ndn_cmd_Data_obj_from_ccn_buffer, METH_O, NULL},
 	{"digest_contentobject", _ndn_cmd_digest_contentobject, METH_VARARGS,
 		NULL},
 	{"content_matches_interest", _ndn_cmd_content_matches_interest,
@@ -194,7 +194,7 @@ initialize_exceptions(void)
 	NEW_EXCEPTION(CCNExclusionFilterError, "NDN ExclusionFilter Exception",
 			g_PyExc_CCNInterestError);
 	NEW_EXCEPTION(CCNKeyError, "NDN Key Exception", g_PyExc_CCNKeyError);
-	NEW_EXCEPTION(CCNContentObjectError, "NDN ContentObject Error",
+	NEW_EXCEPTION(CCNDataError, "NDN Data Error",
 			g_PyExc_CCNError);
 
 	return 0;
@@ -213,14 +213,14 @@ _ndn_get_type(enum e_class_type type)
 	} modules[] = {
 		{Face, "ndn.Face", "Face"},
 		{Closure, "ndn.Closure", "Closure"},
-		{ContentObject, "ndn.ContentObject", "ContentObject"},
+		{Data, "ndn.Data", "Data"},
 		{ExclusionFilter, "ndn.Interest", "ExclusionFilter"},
 		{Interest, "ndn.Interest", "Interest"},
 		{Key, "ndn.Key", "Key"},
-		{KeyLocator, "ndn.Key", "KeyLocator"},
+		{KeyLocator, "ndn.KeyLocator", "KeyLocator"},
 		{Name, "ndn.Name", "Name"},
-		{Signature, "ndn.ContentObject", "Signature"},
-		{SignedInfo, "ndn.ContentObject", "SignedInfo"},
+		{Signature, "ndn.Signature", "Signature"},
+		{SignedInfo, "ndn.SignedInfo", "SignedInfo"},
 		{UpcallInfo, "ndn.Closure", "UpcallInfo"},
 		{CLASS_TYPE_COUNT, NULL, NULL}
 	};
