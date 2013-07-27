@@ -6,7 +6,8 @@ APPNAME='PyNDN'
 from waflib import Configure, Build, Options
 
 def options(opt):
-    opt.load('compiler_c python ndnx')
+    opt.load('compiler_c')
+    opt.load('python ndnx', tooldir=['waf-tools'])
     opt.add_option('--debug',action='store_true',default=False,dest='debug',help='''debugging mode''')
 
 def configure(conf):
@@ -45,13 +46,13 @@ def configure(conf):
 
 def build (bld):
     bld.shlib (features = "pyext",
-               target = "_ndn",
+               target = "ndn/_ndn",
                source = bld.path.ant_glob (["csrc/**/*.c"]),
                use = "NDNX SSL",
                install_path='${PYTHONARCHDIR}/ndn'
                )
 
-    bld (features = "pyext",
+    bld (features = "py",
          source = bld.path.ant_glob (["python/**/*.py"]),
          install_from = "python"
          )
