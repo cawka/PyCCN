@@ -406,10 +406,20 @@ class AggressiveMatch (unittest.TestCase):
          self.assertTrue (res)
          self.assertEquals (m.extract('\\1'), ['b'])
 
+         m = RegexMatcher('<a>(<>*)<>$')
+         res = m.matchN(Name('/n/a/b/c/'))
+         self.assertTrue (res)
+         self.assertEquals (m.extract('\\1'), ['b'])
+
          m = RegexMatcher('^<.*><(.+)\.(.+)><c>(<.*>)')
          res = m.matchN(Name('/n/a.b/c/d/e/f/'))
          self.assertTrue (res)
          self.assertEquals (m.extract('\\2\\1\\3'), ['b','a','d'])
+
+         m = RegexMatcher('^<>(<(.+)\.(.+)>)<c>(<>)<>')
+         res = m.matchN(Name('/n/a.b/c/d/e/f/'))
+         self.assertTrue (res)
+         self.assertEquals (m.extract('\\1\\3\\2\\4'), ['a.b', 'b','a','d'])
 
 if __name__ == '__main__':
     unittest.main()

@@ -130,6 +130,12 @@ class ComponentMatcher(BaseMatcher):
 
         self.matchResult = []
 
+        if "" == self.expr:
+            res = self.matchResult.append(name[offset])
+            self._appendBackRef(res)
+            _LOG.debug("Succeed " + self.__class__.__name__ + ".match() ")
+            return True
+
         matcher = re.compile(self.expr)
         if self.exact:
             res = matcher.match(name[offset])
