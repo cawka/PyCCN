@@ -109,6 +109,21 @@ class ComponentMatcher(BaseMatcher):
 
         super(ComponentMatcher, self).__init__(expr, backRef, exact)
 
+        pattern = re.compile(self.expr)
+        self.pseudoBackRefMatcher = []
+        for i in range(0, pattern.groups):
+            pseudoMatcher = BaseMatcher("", self.backRef)
+            self.pseudoBackRefMatcher.append(pseudoMatcher)
+            self.backRef.append(pseudoMatcher)
+
+    def _appendBackRef(self, res):
+        if res and 0 < len(res.groups()):
+
+            group = res.groups()
+            for i in range(0, len(group)):
+                self.pseudoBackRefMatcher[i].matchResult = []
+                self.pseudoBackRefMatcher[i].matchResult.append(group[i])
+
     def match(self, name, offset, len):
         _LOG.debug(self.__class__.__name__ + ".match(): " + self.expr)
         _LOG.debug("Name " + str(name) + " offset " +  str(offset) + " len " +str(len))
@@ -117,12 +132,16 @@ class ComponentMatcher(BaseMatcher):
 
         matcher = re.compile(self.expr)
         if self.exact:
-            if matcher.match(name[offset]):
+            res = matcher.match(name[offset])
+            if res:
+                self._appendBackRef(res)
                 self.matchResult.append(name[offset])
                 _LOG.debug("Succeed " + self.__class__.__name__ + ".match() ")
                 return True
         else:
-            if matcher.search(name[offset]):
+            res = matcher.search(name[offset])
+            if res:
+                self._appendBackRef(res)
                 self.matchResult.append(name[offset])
                 return True
 
