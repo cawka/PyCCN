@@ -25,6 +25,8 @@ try:
     from ndn import NameCrypto
     from ndn.LocalPrefixDiscovery import LocalPrefixDiscovery
 
+    import nre
+
 except ImportError:
     import sys as _sys
     del _sys.modules [__name__]

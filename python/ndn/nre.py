@@ -621,11 +621,11 @@ def match (pattern, name, flags=0):
     """
     If zero or more characters at the beginning of string match the regular expression pattern, return a corresponding matches as a list. Return None if the string does not match the pattern.
 """
-    if not isinstance (name):
+    if not isinstance (name, Name):
         raise TypeError ("name is not ndn.Name type")
 
     m = RegexMatcher (pattern)
-    res = m.matchN (Name('/n/a/b/c/'))
+    res = m.matchN (Name (name))
     if not res:
         return None
     return m
