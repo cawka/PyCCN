@@ -6,8 +6,8 @@ APPNAME='PyNDN'
 from waflib import Configure, Build, Options
 
 def options(opt):
-    opt.load('compiler_c')
-    opt.load('python ndnx', tooldir=['waf-tools'])
+    opt.load('compiler_c python')
+    opt.load('ndnx', tooldir=['waf-tools'])
     opt.add_option('--debug',action='store_true',default=False,dest='debug',help='''debugging mode''')
 
 def configure(conf):
