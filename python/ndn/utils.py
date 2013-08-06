@@ -95,7 +95,10 @@ class Const (object):
             return object.__getattribute__ (self, "__internal_object").__getattribute__ (name)
         else:
             return object.__getattribute__ (self, name)
-    
+
+    def __getitem__(self, key):
+        return object.__getattribute__ (self, "__internal_object").__getitem__ (key)
+
     def __setattr__ (self, name, value):
         raise TypeError ("Const %s cannot be modified" % type (object.__getattribute__ (self, "__internal_object")))
 
@@ -103,7 +106,7 @@ class Const (object):
         return "const %s" % object.__getattribute__ (self, "__internal_object").__repr__ ()
 
     def __str__(self):
-       return object.__getattribute__ (self, "__internal_object").__str__ () 
+       return object.__getattribute__ (self, "__internal_object").__str__ ()
 
     def __add__(self, other):
         raise TypeError ("Const %s cannot be modified" % type (object.__getattribute__ (self, "__internal_object")))
